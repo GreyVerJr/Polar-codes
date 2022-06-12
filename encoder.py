@@ -1,7 +1,10 @@
 from decimal import *
-from math import log2
 from random import randint
+
 import numpy as np
+from mpmath import sign
+
+from parameters import *
 
 
 def calc_rs(e=0.3, n=10):
@@ -41,26 +44,45 @@ def calc_rs(e=0.3, n=10):
     return rs
 
 
-if __name__ == "__main__":
-    E = 0.3  # Вероятность ошибки
-    N = 8  # Длина блока
-    n = int(log2(N))
-    K = 6  # Длина сообщения
+def encoder():
     msg = [randint(0, 1) for i in range(K)]  # Случайное сообщение
     U = [0] * N
     RS = calc_rs(E, n)
-    for i in range(N - K, len(RS)):
+    for i in range(N - K, N):
         U[RS[i]] = msg[i - N + K]
 
     U = np.array(U)  # Блок до поляризации
     g = np.array([[1, 0], [1, 1]])
     G = g
-    for i in range(n-1):
+    for i in range(n - 1):
         G = np.kron(G, g)  # Произведение кронекера
 
     answer = np.dot(U, G) % 2  # Блок после поляризации
-    print("Massage:             ", msg)
-    print("Reliability sequence:", RS)
-    print("U:                   ", U)
-    print("answer:              ", answer)
 
+    # print("Message:             ", msg)
+    # print("Reliability sequence:", RS)
+    # print("U:                   ", list(U))
+    # print("answer:              ", list(answer))
+
+    msg_file = open("message.txt", "w")
+    msg_file.seek(0)
+    msg_file.write("Message:         " + " ".join([str(i) for i in msg]) + "\n")
+    msg_file.close()
+
+    answer_BPSK = [1 - 2 * n for n in answer]
+    BPSK_text = open("BPSK.txt", "w")
+    BPSK_text.seek(0)
+    BPSK_text.write(" ".join([str(i) for i in answer_BPSK]) + "\n")
+    BPSK_text.close()
+
+    for i in range(len(answer_BPSK)):
+        if randint(0, 9) < int(E * 10):
+            answer_BPSK[i] = int(sign(answer_BPSK[i]) * -1)
+
+    BPSK_text = open("BPSK.txt", "a")
+    BPSK_text.write(" ".join([str(i) for i in answer_BPSK]) + "\n")
+    BPSK_text.close()
+
+
+if __name__ == "__main__":
+    encoder()
