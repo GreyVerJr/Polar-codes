@@ -32,16 +32,13 @@ def decoder():
         if depth == n:
             if index in frozen:
                 index += 1
-                result.append(0)
                 return [0]
             else:
                 if l[0] < 0:
                     index += 1
-                    result.append(1)
                     return [1]
                 else:
                     index += 1
-                    result.append(0)
                     return [0]
 
         left_response = decode(r=r[:len(r) // 2], depth=depth + 1, l=f_func(l))
@@ -51,18 +48,27 @@ def decoder():
     BPSK_text = open("BPSK.txt", "r")
     R = [int(i) for i in BPSK_text.read().split("\n")[1].split(" ")]
     BPSK_text.close()
-
-    RS = calc_rs(E, n)
+    RS = []
+    for i in reliability_sequence:
+        if i < N:
+            RS.append(i)
     frozen = [RS[i] for i in range(len(RS) - K)]
-    result = []
     global index
     index = 0
-    decode(R, 0)
+    U = decode(R, 0)
+    U = np.array(U)  # Блок до поляризации
+    g = np.array([[1, 0], [1, 1]])
+    G = g
+    for i in range(n - 1):
+        G = np.kron(G, g)  # Произведение кронекера
+    answer = np.dot(U, G) % 2
+
     msg = []
     for i in range(N):
         if RS[i] in frozen:
             continue
-        msg.append(result[RS[i]])
+        msg.append(answer[RS[i]])
+
     # print("frozen: ", frozen)
     # print("R:      ", R)
     # print("RS:     ", RS)

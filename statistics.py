@@ -1,11 +1,14 @@
 from decoder import decoder
 from encoder import encoder
 from parameters import *
+import time
+
 
 f = open('statistics.txt', 'w')
 f.close()
 
 counter = 0
+start_time = time.time()
 for i in range(number_of_tests):
     encoder()
     decoder()
@@ -23,5 +26,8 @@ for i in range(number_of_tests):
         stat_file.close()
         counter += 1
 
-
-print("Number of failures: " + str(counter) + "/" + str(number_of_tests) +"\n")
+print("\nВероятность ошибки: %s" % E)
+print("Длина блока: %s" % N)
+print("Длина сообщения: %s" % K)
+print("Количество неудачных декодирований: " + str(counter) + "/" + str(number_of_tests))
+print("Время выполнения программы секундах: %s" % round((time.time() - start_time), 4))

@@ -22,7 +22,7 @@ def calc_rs(e=0.3, n=10):
 
         :param p: вероятность ошибки
         :param depth: глубина дерева
-        :return: З
+        :return:
         """
         if depth == n:
             polarisation.append(Decimal(p))
@@ -47,7 +47,10 @@ def calc_rs(e=0.3, n=10):
 def encoder():
     msg = [randint(0, 1) for i in range(K)]  # Случайное сообщение
     U = [0] * N
-    RS = calc_rs(E, n)
+    RS = []
+    for i in reliability_sequence:
+        if i < N:
+            RS.append(i)
     for i in range(N - K, N):
         U[RS[i]] = msg[i - N + K]
 
